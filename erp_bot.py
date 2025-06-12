@@ -38,7 +38,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "🔥 Welcome to *DarkSniperX ERP Data Bot* 🔥\n"
-        "_Coded by: Sniper_\n\n"
+        "Coded by: Sniper\n\n"
         "*Available Commands:*\n"
         "`/getdata` - Get today’s ERP files\n"
         "`/getzip` - Get all files in one ZIP\n"
