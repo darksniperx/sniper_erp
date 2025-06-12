@@ -37,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         save_data(USER_FILE, users)
 
     await update.message.reply_text(
-        "🔥 Welcome to *DarkSniper_X ERP Data Bot* 🔥\n"
+        "🔥 Welcome to *DarkSniperX ERP Data Bot* 🔥\n"
         "_Coded by: Sniper_\n\n"
         "*Available Commands:*\n"
         "`/getdata` - Get today’s ERP files\n"
