@@ -37,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         save_data(USER_FILE, users)
 
     await update.message.reply_text(
-        "🔥 Welcome to *DarkSniperX ERP Data Bot* 🔥\n"
+        "🔥 Welcome to *DarkSniper_X ERP Data Bot* 🔥\n"
         "_Coded by: Sniper_\n\n"
         "*Available Commands:*\n"
         "`/getdata` - Get today’s ERP files\n"
@@ -75,7 +75,7 @@ async def get_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f.write(log_text + '\n\n')
 
         today = datetime.now().strftime("%d-%m-%Y")
-        await update.message.reply_text(f"💀 *DarkSniper_X Activated* 💀\n📅 Date: `{today}`\n📡 Scanning ERP export files...", parse_mode="Markdown")
+        await update.message.reply_text(f"💀 *DarkSniper\\_X Activated* 💀\n📅 Date: `{today}`\n📡 Scanning ERP export files...", parse_mode="Markdown")
 
         response = requests.get(BASE_URL)
         soup = BeautifulSoup(response.text, 'html.parser')
