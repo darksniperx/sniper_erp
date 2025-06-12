@@ -5,6 +5,7 @@ import zipfile
 from bs4 import BeautifulSoup
 from io import BytesIO
 from telegram import Update, InputFile
+from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from datetime import datetime
 
@@ -29,7 +30,10 @@ def save_data(file, data):
     with open(file, 'w') as f:
         json.dump(list(data), f)
 
-# ⬇️ START
+def escape(text):
+    return text.replace("_", "\\_").replace("*", "\\*").replace("`", "\\`").replace("-", "\\-")
+
+# START
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = str(update.effective_user.id)
     if uid not in blocked:
@@ -37,27 +41,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         save_data(USER_FILE, users)
 
     await update.message.reply_text(
-        "🔥 Welcome to *DarkSniperX ERP Data Bot* 🔥\n"
-        "Coded by: Sniper\n\n"
+        "🔥 Welcome to *DarkSniper\\_X ERP Data Bot* 🔥\n"
+        "Coded by: *Sniper*\n\n"
         "*Available Commands:*\n"
-        "`/getdata` - Get today’s ERP files\n"
-        "`/getzip` - Get all files in one ZIP\n"
-        "`/feedback <msg>` - Send feedback to admin\n"
-        "`/help` - Show this command list again\n\n"
+        "`/getdata` \\- Get today’s ERP files\n"
+        "`/getzip` \\- Get all files in one ZIP\n"
+        "`/feedback <msg>` \\- Send feedback to admin\n"
+        "`/help` \\- Show this command list again\n\n"
         "*Admin Only Commands:*\n"
         "`/block <user_id>`\n"
         "`/unblock <user_id>`\n"
         "`/broadcast <msg>`\n"
         "`/reply <user_id> <msg>`\n"
-        "`/userlist` - Export user IDs\n",
-        parse_mode="Markdown"
+        "`/userlist` \\- Export user IDs\n",
+        parse_mode=ParseMode.MARKDOWN_V2
     )
 
-# ⬇️ HELP
 async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await start(update, context)
 
-# ⬇️ GET DATA
+# GET DATA
 async def get_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         uid = str(update.effective_user.id)
@@ -67,15 +70,22 @@ async def get_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         user = update.effective_user
         username = f"@{user.username}" if user.username else "No username"
-        first_name = user.first_name
+        first_name = escape(user.first_name)
 
         log_text = f"👤 Name: {first_name}\n🔗 Username: {username}\n🆔 ID: {uid}\n📌 Command: /getdata"
-        await context.bot.send_message(chat_id=ADMIN_ID, text=f"👀 *New Access Alert!*\n\n{log_text}", parse_mode="Markdown")
+        await context.bot.send_message(
+            chat_id=ADMIN_ID,
+            text=f"👀 *New Access Alert\\!*\\n\\n{escape(log_text)}",
+            parse_mode=ParseMode.MARKDOWN_V2
+        )
         with open(LOG_FILE, 'a') as f:
             f.write(log_text + '\n\n')
 
         today = datetime.now().strftime("%d-%m-%Y")
-        await update.message.reply_text(f"💀 *DarkSniperX Activated* 💀\n📅 Date: `{today}`\n📡 Scanning ERP export files...", parse_mode="Markdown")
+        await update.message.reply_text(
+            f"💀 *DarkSniper\\_X Activated* 💀\n📅 Date: `{today}`\n📡 Scanning ERP export files...",
+            parse_mode=ParseMode.MARKDOWN_V2
+        )
 
         response = requests.get(BASE_URL)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -91,11 +101,11 @@ async def get_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
             file_data = requests.get(file_url).content
             await update.message.reply_document(document=file_data, filename=file_name)
 
-        await update.message.reply_text("✅ *Mission Complete: All files sent.*", parse_mode="Markdown")
+        await update.message.reply_text("✅ *Mission Complete: All files sent.*", parse_mode=ParseMode.MARKDOWN_V2)
     except Exception as e:
-        await update.message.reply_text(f"⚠️ Error:\n`{str(e)}`", parse_mode="Markdown")
+        await update.message.reply_text(f"⚠️ Error:\n`{escape(str(e))}`", parse_mode=ParseMode.MARKDOWN_V2)
 
-# ⬇️ GET ZIP
+# GET ZIP
 async def get_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = str(update.effective_user.id)
     if uid in blocked:
@@ -121,14 +131,14 @@ async def get_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     zip_buffer.seek(0)
     await update.message.reply_document(document=InputFile(zip_buffer, filename="ERP_Sniper_Data.zip"))
 
-# ⬇️ ADMIN COMMANDS
+# ADMIN COMMANDS
 async def block_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
     if context.args:
         blocked.add(context.args[0])
         save_data(BLOCKED_FILE, blocked)
-        await update.message.reply_text(f"✅ User `{context.args[0]}` blocked.", parse_mode="Markdown")
+        await update.message.reply_text(f"✅ User `{context.args[0]}` blocked.", parse_mode=ParseMode.MARKDOWN_V2)
 
 async def unblock_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
@@ -136,7 +146,7 @@ async def unblock_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         blocked.discard(context.args[0])
         save_data(BLOCKED_FILE, blocked)
-        await update.message.reply_text(f"✅ User `{context.args[0]}` unblocked.", parse_mode="Markdown")
+        await update.message.reply_text(f"✅ User `{context.args[0]}` unblocked.", parse_mode=ParseMode.MARKDOWN_V2)
 
 async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
@@ -149,7 +159,7 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for uid in users:
         if uid not in blocked:
             try:
-                await context.bot.send_message(chat_id=int(uid), text=f"📢 *Broadcast:*\n{message}", parse_mode="Markdown")
+                await context.bot.send_message(chat_id=int(uid), text=f"📢 *Broadcast:*\n{escape(message)}", parse_mode=ParseMode.MARKDOWN_V2)
                 sent += 1
             except:
                 pass
@@ -157,10 +167,10 @@ async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def feedback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = str(update.effective_user.id)
-    name = update.effective_user.first_name
+    name = escape(update.effective_user.first_name)
     username = f"@{update.effective_user.username}" if update.effective_user.username else "No username"
-    msg = ' '.join(context.args)
-    await context.bot.send_message(chat_id=ADMIN_ID, text=f"📬 *Feedback Received*\nFrom: {name} ({username})\nID: {uid}\n\nMessage:\n{msg}", parse_mode="Markdown")
+    msg = escape(' '.join(context.args))
+    await context.bot.send_message(chat_id=ADMIN_ID, text=f"📬 *Feedback Received*\nFrom: {name} ({username})\nID: {uid}\n\nMessage:\n{msg}", parse_mode=ParseMode.MARKDOWN_V2)
     await update.message.reply_text("✅ Feedback sent to admin.")
 
 async def reply_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -170,9 +180,9 @@ async def reply_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❗ Usage: /reply <user_id> <message>")
         return
     uid = context.args[0]
-    msg = ' '.join(context.args[1:])
+    msg = escape(' '.join(context.args[1:]))
     try:
-        await context.bot.send_message(chat_id=int(uid), text=f"📩 *Message from Admin:*\n{msg}", parse_mode="Markdown")
+        await context.bot.send_message(chat_id=int(uid), text=f"📩 *Message from Admin:*\n{msg}", parse_mode=ParseMode.MARKDOWN_V2)
         await update.message.reply_text("✅ Message sent.")
     except:
         await update.message.reply_text("❌ Failed to send message.")
@@ -185,7 +195,7 @@ async def userlist(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f.write(data)
     await update.message.reply_document(document=open('userlist.txt', 'rb'))
 
-# ⬇️ MAIN
+# MAIN
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
